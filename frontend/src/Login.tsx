@@ -1,74 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-interface LoginProps {
-  setToken: (token: string | null) => void;
-  setShowLogin: (show: boolean) => void;
-}
-
-const Login: React.FC<LoginProps> = ({ setToken, setShowLogin }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch('http://localhost:8000/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setToken(data.access_token);
-        localStorage.setItem('token', data.access_token);
-        setShowLogin(false);
-        setMessage('');
-      } else {
-        setMessage(data.detail || 'Login failed');
-      }
-    } catch (error) {
-      setMessage('Network error: Could not connect to the server');
-    }
-  };
-
+// Componente de Login con animaciones y accesibilidad mejorada
+const Login: React.FC = () => {
   return (
-    <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-      <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">Login</h2>
-      <form onSubmit={handleLogin} className="space-y-4">
-        <div>
+    // Contenedor del formulario con animación de entrada
+    <motion.div
+      initial={{ opacity: 0, y: -50 }} // Estado inicial: invisible y desplazado hacia arriba
+      animate={{ opacity: 1, y: 0 }} // Estado final: visible y en su posición original
+      transition={{ duration: 0.5 }} // Duración de la animación: 0.5 segundos
+      className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
+    >
+      {/* Título del formulario */}
+      <h2 className="text-2xl font-semibold mb-6 text-center text-gray-800">Login</h2>
+      <form>
+        {/* Campo de Username con etiqueta para accesibilidad */}
+        <div className="mb-4">
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            Username
+          </label>
           <input
+            id="username"
             type="text"
             placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
           />
         </div>
-        <div>
+        {/* Campo de Password con etiqueta para accesibilidad */}
+        <div className="mb-6">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Password
+          </label>
           <input
+            id="password"
             type="password"
             placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-accent"
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-blue"
           />
         </div>
+        {/* Botón de Login */}
         <button
           type="submit"
-          className="w-full bg-secondary text-white p-2 rounded hover:bg-opacity-90 transition"
+          className="w-full bg-primary-red text-white p-3 rounded-lg hover:bg-red-700 transition-colors"
         >
           Login
         </button>
-        {message && <p className="text-secondary text-center">{message}</p>}
+        {/* Botón de Go to Employees */}
+        <button
+          type="button"
+          className="w-full mt-3 bg-gray-800 text-white p-3 rounded-lg hover:bg-gray-900 transition-colors"
+        >
+          Go to Employees
+        </button>
       </form>
-      <button
-        onClick={() => setShowLogin(false)}
-        className="mt-4 w-full bg-accent text-white p-2 rounded hover:bg-opacity-90 transition"
-      >
-        Go to Employees
-      </button>
-    </div>
+    </motion.div>
   );
 };
 
