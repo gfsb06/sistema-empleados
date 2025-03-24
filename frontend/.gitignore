@@ -1,0 +1,17 @@
+# Dependencias
+node_modules/
+
+
+# Archivos de build
+build/
+
+# Archivos de caché y logs
+npm-debug.log
+.npm/
+.cache/
+
+# Archivos de entorno
+.env
+
+# Archivos de VS Code
+.vscode/
