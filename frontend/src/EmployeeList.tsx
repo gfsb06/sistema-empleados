@@ -1,59 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
+// Datos estáticos de empleados (simulados)
+const mockEmployees = [
+  { id: 1, name: 'Juan Pérez', email: 'juan.perez@example.com', position: 'Desarrollador' },
+  { id: 2, name: 'María Gómez', email: 'maria.gomez@example.com', position: 'Diseñadora' },
+  { id: 3, name: 'Carlos López', email: 'carlos.lopez@example.com', position: 'Gerente' },
+];
+
+// Componente para mostrar la lista de empleados
 const EmployeeList: React.FC = () => {
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [message, setMessage] = useState('');
+  // Función para exportar el reporte como CSV
+  const handleExportReport = () => {
+    try {
+      // Crear el contenido del CSV con codificación UTF-8
+      const csvHeaders = 'id,name,email,position\n';
+      const csvRows = mockEmployees
+        .map((employee) => `${employee.id},${employee.name},${employee.email},${employee.position}`)
+        .join('\n');
+      const csvContent = `\ufeff${csvHeaders}${csvRows}`; // Añadir BOM para UTF-8
 
-  useEffect(() => {
-    const fetchEmployees = async () => {
-      try {
-        const token = localStorage.getItem('token'); // Obtener el token de localStorage
-        if (!token) {
-          setMessage('No estás autenticado. Por favor, inicia sesión.');
-          return;
-        }
-
-        const response = await fetch('http://localhost:8000/employees', {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`, // Incluir el token en el header
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.length === 0) {
-            setMessage('No hay empleados registrados.');
-          } else {
-            setEmployees(data);
-            setMessage('');
-          }
-        } else {
-          const errorData = await response.json();
-          setMessage('Error al cargar empleados: ' + (errorData.detail || 'Unknown error'));
-        }
-      } catch (error) {
-        setMessage('Error de red: No se pudo conectar al servidor');
-      }
-    };
-
-    fetchEmployees();
-  }, []);
+      // Crear un blob y un enlace para descargar el CSV
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'employees-report.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al exportar el reporte:', error);
+      alert('No se pudo exportar el reporte');
+    }
+  };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1 style={{ color: '#2B628B' }}>Lista de Empleados</h1>
-      {message ? (
-        <p style={{ color: 'red' }}>{message}</p>
-      ) : (
-        <ul>
-          {employees.map((employee) => (
-            <li key={employee.id}>
-              {employee.name} - {employee.email || 'Sin email'}
-            </li>
-          ))}
-        </ul>
-      )}
+    <div className="min-h-screen bg-primary-blue flex items-center justify-center">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+        <h2 className="text-2xl font-semibold mb-6 text-gray-800">Lista de Empleados</h2>
+        <button
+          onClick={handleExportReport}
+          className="bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition-colors mb-4"
+        >
+          Exportar Reporte
+        </button>
+        <table className="w-full border-collapse border border-gray-300">
+          <thead>
+            <tr className="bg-gray-100">
+              <th className="border border-gray-300 p-2">ID</th>
+              <th className="border border-gray-300 p-2">Nombre</th>
+              <th className="border border-gray-300 p-2">Email</th>
+              <th className="border border-gray-300 p-2">Posición</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mockEmployees.map((employee) => (
+              <tr key={employee.id}>
+                <td className="border border-gray-300 p-2">{employee.id}</td>
+                <td className="border border-gray-300 p-2">{employee.name}</td>
+                <td className="border border-gray-300 p-2">{employee.email}</td>
+                <td className="border border-gray-300 p-2">{employee.position}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
